@@ -49,6 +49,25 @@ server.get("/api/users/:id", (req, res) => {
     });
 });
 
+// POST /api/users creates new user
+server.post("/api/users", (req, res) => {
+  const { name, bio } = req.body;
+  if (name && bio) {
+    usersDb
+      .insert({ name: name, bio: bio })
+      .then(user => {
+        res.status(201).json(user);
+      })
+      .catch(err => {
+        res.status(500).json({ error: "Error while saving user to database" });
+      });
+  } else {
+    res
+      .status(400)
+      .json({ message: "Please provide a name and bio for the new user" });
+  }
+});
+
 // set server to listen to port declared above with a message letting me know it's working
 server.listen(port, () => {
   console.log(`\n***API up and running on port ${port}***\n`);
