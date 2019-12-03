@@ -27,7 +27,7 @@ server.get("/api/users", (req, res) => {
       }
     })
     .catch(err => {
-      res.status(500).json({ error: "The users could not be retrieved" });
+      res.status(500).json({ error: "The users could not be retrieved", err });
     });
 });
 
@@ -45,7 +45,7 @@ server.get("/api/users/:id", (req, res) => {
     .catch(err => {
       res
         .status(500)
-        .json({ error: "User information could not be retrieved" });
+        .json({ error: "User information could not be retrieved", err });
     });
 });
 
@@ -59,7 +59,45 @@ server.post("/api/users", (req, res) => {
         res.status(201).json(user);
       })
       .catch(err => {
-        res.status(500).json({ error: "Error while saving user to database" });
+        res
+          .status(500)
+          .json({ error: "Error while saving user to database", err });
+      });
+  } else {
+    res
+      .status(400)
+      .json({ message: "Please provide a name and bio for the new user" });
+  }
+});
+
+// PUT /api/users/:id edits user by id
+server.put("api/users/:id", (req, res) => {
+  const id = req.params.id;
+  const { name, bio } = req.body;
+
+  if (name && bio) {
+    usersDb
+      .findById(id)
+      .then(user => {
+        if (user) {
+          usersDb
+            .update(id, { name: name, bio: bio })
+            .then(() => {
+              res.status(200).json({ ...user, name: name, bio: bio });
+            })
+            .catch(err => {
+              res
+                .status(500)
+                .json({ error: "User could not be modified", err });
+            });
+        } else {
+          res
+            .status(404)
+            .json({ message: "User with specified ID does not exist" });
+        }
+      })
+      .catch(err => {
+        res.status(500).json({ error: "User could not be modified", err });
       });
   } else {
     res
