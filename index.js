@@ -71,7 +71,7 @@ server.post("/api/users", (req, res) => {
 });
 
 // PUT /api/users/:id edits user by id
-server.put("api/users/:id", (req, res) => {
+server.put("/api/users/:id", (req, res) => {
   const id = req.params.id;
   const { name, bio } = req.body;
 
@@ -104,6 +104,33 @@ server.put("api/users/:id", (req, res) => {
       .status(400)
       .json({ message: "Please provide a name and bio for the new user" });
   }
+});
+
+// DELETE /api/users/:id deletes user from db by id
+server.delete("/api/users/:id", (req, res) => {
+  const id = req.params.id;
+
+  usersDb
+    .findById(id)
+    .then(user => {
+      if (user) {
+        usersDb
+          .remove(id)
+          .then(() => {
+            res.status(200).json(user);
+          })
+          .catch(err => {
+            res.status(500).json({ error: "User could not be removed", err });
+          });
+      } else {
+        res
+          .status(404)
+          .json({ message: "User with specified ID does not exist" });
+      }
+    })
+    .catch(err => {
+      res.status(500).json({ error: "User could not be removed", err });
+    });
 });
 
 // set server to listen to port declared above with a message letting me know it's working
