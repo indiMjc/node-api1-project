@@ -31,6 +31,24 @@ server.get("/api/users", (req, res) => {
     });
 });
 
+// GET /api/users/:id to return user by id
+server.get("/api/users/:id", (req, res) => {
+  usersDb
+    .findById(req.params.id)
+    .then(user => {
+      if (user) {
+        res.status(200).json(user);
+      } else {
+        res.status(404).json({ message: "Specified user does not exist" });
+      }
+    })
+    .catch(err => {
+      res
+        .status(500)
+        .json({ error: "User information could not be retrieved" });
+    });
+});
+
 // set server to listen to port declared above with a message letting me know it's working
 server.listen(port, () => {
   console.log(`\n***API up and running on port ${port}***\n`);
